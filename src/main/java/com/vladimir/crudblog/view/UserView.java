@@ -5,7 +5,7 @@ import com.vladimir.crudblog.model.Post;
 import com.vladimir.crudblog.model.Region;
 import com.vladimir.crudblog.model.Role;
 import com.vladimir.crudblog.model.User;
-import com.vladimir.crudblog.service.ServiceException;
+import com.vladimir.crudblog.repository.RepositoryException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -157,7 +157,7 @@ public class UserView implements View {
         try {
             User user = userController.getByID(id);
             System.out.println(user);
-        } catch (ServiceException e) {
+        } catch (RepositoryException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -274,7 +274,7 @@ public class UserView implements View {
         User updatedUser = null;
         try {
             updatedUser =  userController.update(id, firstName, lastName, region, role, postsToAdd, postsToDelete);
-        } catch (ServiceException e) {
+        } catch (RepositoryException e) {
             System.out.println(e.getMessage());
             System.out.println("User with ID " + id + " has not been updated");
         }
@@ -293,7 +293,7 @@ public class UserView implements View {
         }
         try{
             userController.deleteByID(id);
-        } catch (ServiceException e){
+        } catch (RepositoryException e){
             System.out.println(e.getMessage());
             return;
         }

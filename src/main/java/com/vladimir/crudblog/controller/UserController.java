@@ -4,7 +4,7 @@ import com.vladimir.crudblog.model.Post;
 import com.vladimir.crudblog.model.Region;
 import com.vladimir.crudblog.model.Role;
 import com.vladimir.crudblog.model.User;
-import com.vladimir.crudblog.service.ServiceException;
+import com.vladimir.crudblog.repository.RepositoryException;
 import com.vladimir.crudblog.repository.SQL.SQLUserRepositoryImpl;
 import com.vladimir.crudblog.repository.UserRepository;
 
@@ -28,7 +28,7 @@ public class UserController {
         else {
             try {
                 region = regionController.getByID(region.getId());
-            } catch (ServiceException e) {
+            } catch (RepositoryException e) {
                 region = null;
             }
         }
@@ -39,7 +39,7 @@ public class UserController {
             else{
                 try {
                     tempPosts.add(postController.getByID(post.getId()));
-                } catch (ServiceException ignored) {}
+                } catch (RepositoryException ignored) {}
             }
         });
         tempPosts.removeIf(Objects::isNull);
@@ -49,15 +49,15 @@ public class UserController {
         return user;
     }
 
-    public User getByID(Long id) throws ServiceException {
+    public User getByID(Long id) throws RepositoryException {
         return userRepository.getById(id);
     }
 
-    public void deleteByID(Long id) throws ServiceException {
+    public void deleteByID(Long id) throws RepositoryException {
         userRepository.deleteById(id);
     }
 
-    public User update(Long id, String firstName, String lastName, Region region, Role role, List<Long> toAdd, List<Long> toDelete) throws ServiceException {
+    public User update(Long id, String firstName, String lastName, Region region, Role role, List<Long> toAdd, List<Long> toDelete) throws RepositoryException {
         User user = userRepository.getById(id);
         if(firstName != null)
             user.setFirstName(firstName);
@@ -101,7 +101,7 @@ public class UserController {
     public boolean exists(Long id) {
         try {
             userRepository.getById(id);
-        } catch (ServiceException e) {
+        } catch (RepositoryException e) {
             return false;
         }
         return true;

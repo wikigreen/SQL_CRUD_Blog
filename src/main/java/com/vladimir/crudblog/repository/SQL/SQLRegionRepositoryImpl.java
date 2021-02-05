@@ -2,8 +2,8 @@ package com.vladimir.crudblog.repository.SQL;
 
 import com.vladimir.crudblog.model.Region;
 import com.vladimir.crudblog.repository.RegionRepository;
-import com.vladimir.crudblog.service.ServiceException;
-import com.vladimir.crudblog.service.SQLConnection;
+import com.vladimir.crudblog.repository.RepositoryException;
+import com.vladimir.crudblog.service.SQLService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class SQLRegionRepositoryImpl implements RegionRepository {
     private final static SQLRegionRepositoryImpl regionRepository = new SQLRegionRepositoryImpl();
-    private final SQLConnection sqlConnection = SQLConnection.getInstance();
+    private final SQLService sqlService = SQLService.getInstance();
 
     private SQLRegionRepositoryImpl() {}
 
@@ -24,7 +24,7 @@ public class SQLRegionRepositoryImpl implements RegionRepository {
     @Override
     public Region save(Region region) {
         ResultSet resultSet = null;
-        try (Statement statement = sqlConnection.createStatement()){
+        try (Statement statement = sqlService.createStatement()){
             statement.executeUpdate("insert into region(region) values('" + region.getName() + "')");
             resultSet = statement.executeQuery("select ID from region order by ID desc limit 1");
             if (resultSet.next()){
@@ -46,9 +46,9 @@ public class SQLRegionRepositoryImpl implements RegionRepository {
     }
 
     @Override
-    public Region update(Region region) throws ServiceException {
+    public Region update(Region region) throws RepositoryException {
         int countOfChangedRows;
-        try (Statement statement = sqlConnection.createStatement()){
+        try (Statement statement = sqlService.createStatement()){
             countOfChangedRows = statement.executeUpdate("update region " +
                                         "set region = '"+ region.getName() +"' " +
                                         "where id = " + region.getId());
@@ -56,15 +56,15 @@ public class SQLRegionRepositoryImpl implements RegionRepository {
             throw new Error(sqlE.getMessage());
         }
         if(countOfChangedRows < 1)
-            throw new ServiceException("There is no region with id " + region.getId());
+            throw new RepositoryException("There is no region with id " + region.getId());
         return region;
     }
 
     @Override
-    public Region getById(Long id) throws ServiceException {
+    public Region getById(Long id) throws RepositoryException {
         Region region = null;
-        try (Statement statement = sqlConnection.createStatement();
-             ResultSet resultSet = statement.executeQuery("select * from region where id = " + id)){
+        try (Statement statement = sqlService.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from region where id = " + id)){
             if (resultSet.next()) {
                 region = new Region(resultSet.getLong("id"), resultSet.getString("region"));
             }
@@ -72,15 +72,15 @@ public class SQLRegionRepositoryImpl implements RegionRepository {
             throw new Error(sqlE.getMessage());
         }
         if(region == null)
-            throw new ServiceException("There is no region with id " + id);
+            throw new RepositoryException("There is no region with id " + id);
 
         return region;
     }
 
     @Override
-    public void deleteById(Long id) throws ServiceException {
+    public void deleteById(Long id) throws RepositoryException {
         int countOfChangedRows;
-        try (Statement statement = sqlConnection.createStatement()){
+        try (Statement statement = sqlService.createStatement()){
             statement.executeUpdate("update user set Region_ID = null where Region_ID = " + id);
             countOfChangedRows = statement.executeUpdate("delete from region " +
                     "where id = " + id);
@@ -88,15 +88,15 @@ public class SQLRegionRepositoryImpl implements RegionRepository {
             throw new Error(sqlE.getMessage());
         }
         if(countOfChangedRows < 1)
-            throw new ServiceException("There is no region with id " + id);
+            throw new RepositoryException("There is no region with id " + id);
 
     }
 
     @Override
     public List<Region> getAll() {
         ArrayList<Region> regions = new ArrayList<>();
-        try (Statement statement = sqlConnection.createStatement();
-             ResultSet resultSet = statement.executeQuery("select * from region")){
+        try (Statement statement = sqlService.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from region")){
             while (resultSet.next()) {
                 regions.add(new Region(resultSet.getLong("id"), resultSet.getString("region")));
             }

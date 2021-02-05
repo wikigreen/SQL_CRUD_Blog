@@ -3,8 +3,8 @@ package com.vladimir.crudblog.service;
 import java.sql.*;
 
 
-public class SQLConnection {
-    private static SQLConnection sqlConnection;
+public class SQLService {
+    private static SQLService sqlService;
     private final Connection connection;
     private static boolean isInitialized = false;
 
@@ -19,22 +19,22 @@ public class SQLConnection {
     private final String USER = "blogger";
     private final String PASSWORD = "blogger";
 
-    public static SQLConnection initialize() throws SQLException {
+    public static SQLService initialize() throws SQLException {
         if(!isInitialized){
-            sqlConnection = new SQLConnection();
+            sqlService = new SQLService();
             isInitialized = true;
-            return sqlConnection;
+            return sqlService;
         }
         throw new IllegalStateException("SQLService has already been initialized");
     }
 
-    public static SQLConnection getInstance(){
+    public static SQLService getInstance(){
         if(isInitialized)
-            return sqlConnection;
+            return sqlService;
         throw new IllegalStateException("SQLService has not been initialized");
     }
 
-    private SQLConnection() throws SQLException {
+    private SQLService () throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {

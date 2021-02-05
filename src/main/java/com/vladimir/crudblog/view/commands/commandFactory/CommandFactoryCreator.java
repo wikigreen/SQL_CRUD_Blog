@@ -1,12 +1,12 @@
 package com.vladimir.crudblog.view.commands.commandFactory;
 
-import com.vladimir.crudblog.service.SQLConnection;
+import com.vladimir.crudblog.service.SQLService;
 import com.vladimir.crudblog.view.commands.UnknownCommandException;
 
 public class CommandFactoryCreator {
-    private SQLConnection service;
+    private SQLService service;
 
-    public CommandFactoryCreator(SQLConnection service) {
+    public CommandFactoryCreator(SQLService service) {
         this.service = service;
     }
 

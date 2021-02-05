@@ -2,7 +2,7 @@ package com.vladimir.crudblog.controller;
 
 import com.vladimir.crudblog.model.Post;
 import com.vladimir.crudblog.repository.PostRepository;
-import com.vladimir.crudblog.service.ServiceException;
+import com.vladimir.crudblog.repository.RepositoryException;
 import com.vladimir.crudblog.repository.SQL.SQLPostRepositoryImpl;
 
 import java.util.List;
@@ -20,15 +20,15 @@ public class PostController {
         return post;
     }
 
-    public Post getByID(Long id) throws ServiceException {
+    public Post getByID(Long id) throws RepositoryException {
         return repository.getById(id);
     }
 
-    public void deleteByID(Long id) throws ServiceException {
+    public void deleteByID(Long id) throws RepositoryException {
         repository.deleteById(id);
     }
 
-    public Post update(Post post) throws ServiceException {
+    public Post update(Post post) throws RepositoryException {
         repository.update(post);
         return post;
     }

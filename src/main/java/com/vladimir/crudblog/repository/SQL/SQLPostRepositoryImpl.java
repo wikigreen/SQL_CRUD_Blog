@@ -2,8 +2,8 @@ package com.vladimir.crudblog.repository.SQL;
 
 import com.vladimir.crudblog.model.Post;
 import com.vladimir.crudblog.repository.PostRepository;
-import com.vladimir.crudblog.service.ServiceException;
-import com.vladimir.crudblog.service.SQLConnection;
+import com.vladimir.crudblog.repository.RepositoryException;
+import com.vladimir.crudblog.service.SQLService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class SQLPostRepositoryImpl implements PostRepository {
     private final static SQLPostRepositoryImpl postRepository = new SQLPostRepositoryImpl();
-    private final SQLConnection sqlConnection = SQLConnection.getInstance();
+    private final SQLService sqlService = SQLService.getInstance();
 
     private SQLPostRepositoryImpl() {}
 
@@ -25,7 +25,7 @@ public class SQLPostRepositoryImpl implements PostRepository {
     public Post save(Post post) {
         ResultSet resultSet = null;
 
-        try (Statement statement = sqlConnection.createStatement()){
+        try (Statement statement = sqlService.createStatement()){
             statement.executeUpdate("insert into post(content) " +
                     "values ('" + post.getContent() + "')");
             resultSet = statement.executeQuery("select ID from post order by ID desc limit 1");
@@ -49,9 +49,9 @@ public class SQLPostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public Post update(Post post) throws ServiceException {
+    public Post update(Post post) throws RepositoryException {
         int countOfChangedRows;
-        try (Statement statement = sqlConnection.createStatement()){
+        try (Statement statement = sqlService.createStatement()){
             countOfChangedRows = statement.executeUpdate("update post "
                     + "set content = '" + post.getContent() + "', "
                     + "update_date = current_time()"
@@ -60,15 +60,15 @@ public class SQLPostRepositoryImpl implements PostRepository {
             throw new Error(sqlE.getMessage());
         }
         if(countOfChangedRows < 1)
-            throw new ServiceException("There is no post with id " + post.getId());
+            throw new RepositoryException("There is no post with id " + post.getId());
         return post;
     }
 
     @Override
-    public Post getById(Long id) throws ServiceException {
+    public Post getById(Long id) throws RepositoryException {
         Post post = null;
-        try (Statement statement = sqlConnection.createStatement();
-             ResultSet resultSet = statement.executeQuery("select * from post where id = " + id)){
+        try (Statement statement = sqlService.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from post where id = " + id)){
             if (resultSet.next()) {
                 post = new Post(resultSet.getLong("ID"),
                                 resultSet.getString("content"),
@@ -79,14 +79,14 @@ public class SQLPostRepositoryImpl implements PostRepository {
             throw new Error(e.getMessage());
         }
         if(post == null)
-            throw new ServiceException("There is no post with id " + id);
+            throw new RepositoryException("There is no post with id " + id);
         return post;
     }
 
     @Override
-    public void deleteById(Long id) throws ServiceException {
+    public void deleteById(Long id) throws RepositoryException {
         int countOfChangedRows;
-        try (Statement statement = sqlConnection.createStatement()){
+        try (Statement statement = sqlService.createStatement()){
             statement.executeUpdate("delete from users_posts where Post_ID = " + id);
             countOfChangedRows = statement.executeUpdate(
                 "delete from post " +
@@ -95,14 +95,14 @@ public class SQLPostRepositoryImpl implements PostRepository {
             throw new Error(sqlE.getMessage());
         }
         if(countOfChangedRows < 1)
-            throw new ServiceException("There is no post with id " + id);
+            throw new RepositoryException("There is no post with id " + id);
     }
 
     @Override
     public List<Post> getAll() {
         ArrayList<Post> posts = new ArrayList<>();
-        try (Statement statement = sqlConnection.createStatement();
-             ResultSet resultSet = statement.executeQuery("select * from post")){
+        try (Statement statement = sqlService.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from post")){
             while (resultSet.next()) {
                 posts.add(new Post(resultSet.getLong("ID"),
                         resultSet.getString("content"),

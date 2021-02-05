@@ -2,7 +2,7 @@ package com.vladimir.crudblog.controller;
 
 import com.vladimir.crudblog.model.Region;
 import com.vladimir.crudblog.repository.RegionRepository;
-import com.vladimir.crudblog.service.ServiceException;
+import com.vladimir.crudblog.repository.RepositoryException;
 import com.vladimir.crudblog.repository.SQL.SQLRegionRepositoryImpl;
 
 import java.util.List;
@@ -24,16 +24,16 @@ public class RegionController {
         return region;
     }
 
-    public Region getByID(Long id) throws ServiceException {
+    public Region getByID(Long id) throws RepositoryException {
         return repository.getById(id);
     }
 
 
-    public void deleteByID(Long id) throws ServiceException {
+    public void deleteByID(Long id) throws RepositoryException {
         repository.deleteById(id);
     }
 
-    public Region update(Region region) throws ServiceException {
+    public Region update(Region region) throws RepositoryException {
         repository.update(region);
         return region;
     }

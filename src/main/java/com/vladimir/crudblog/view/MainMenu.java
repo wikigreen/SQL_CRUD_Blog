@@ -1,6 +1,6 @@
 package com.vladimir.crudblog.view;
 
-import com.vladimir.crudblog.service.SQLConnection;
+import com.vladimir.crudblog.service.SQLService;
 import com.vladimir.crudblog.view.commands.Command;
 import com.vladimir.crudblog.view.commands.UnknownCommandException;
 import com.vladimir.crudblog.view.commands.commandFactory.CommandFactoryCreator;
@@ -20,10 +20,10 @@ public class MainMenu {
     }
 
     public void run(){
-        SQLConnection service;
+        SQLService service;
         while (true){
             try {
-                service = SQLConnection.initialize();
+                service = SQLService.initialize();
                 break;
             } catch (SQLException e) {
                 System.out.println("Can not connect to database...");
@@ -40,7 +40,7 @@ public class MainMenu {
         System.out.println("See you!!!");
     }
 
-    private void executeCommand(SQLConnection service) {
+    private void executeCommand(SQLService service) {
         String stringCommand = SCANNER.nextLine().trim();
         if("".equals(stringCommand))
             return;
