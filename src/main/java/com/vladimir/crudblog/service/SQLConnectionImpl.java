@@ -3,11 +3,9 @@ package com.vladimir.crudblog.service;
 import java.sql.*;
 
 
-public class SQLService {
-    private static SQLService sqlService;
+public class SQLConnectionImpl implements SQLConnection {
+    private static SQLConnectionImpl sqlConnectionImpl;
     private final Connection connection;
-    private static boolean isInitialized = false;
-
     /**
      * JDBC Driver and database url
      */
@@ -16,25 +14,19 @@ public class SQLService {
     /**
      * User and Password
      */
+
     private final String USER = "blogger";
     private final String PASSWORD = "blogger";
 
-    public static SQLService initialize() throws SQLException {
-        if(!isInitialized){
-            sqlService = new SQLService();
-            isInitialized = true;
-            return sqlService;
+    public static SQLConnectionImpl getInstance() throws SQLException {
+        if(sqlConnectionImpl == null){
+            sqlConnectionImpl = new SQLConnectionImpl();
         }
-        throw new IllegalStateException("SQLService has already been initialized");
+        return sqlConnectionImpl;
     }
 
-    public static SQLService getInstance(){
-        if(isInitialized)
-            return sqlService;
-        throw new IllegalStateException("SQLService has not been initialized");
-    }
 
-    private SQLService () throws SQLException {
+    private SQLConnectionImpl() throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {

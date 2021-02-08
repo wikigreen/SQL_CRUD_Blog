@@ -2,7 +2,7 @@ package com.vladimir.crudblog.view;
 
 import com.vladimir.crudblog.controller.PostController;
 import com.vladimir.crudblog.model.Post;
-import com.vladimir.crudblog.repository.RepositoryException;
+import com.vladimir.crudblog.service.ServiceException;
 
 import java.util.List;
 import java.util.Scanner;
@@ -50,7 +50,7 @@ public class PostView implements View{
         try {
             post = postController.getByID(id);
             System.out.println(post);
-        } catch (RepositoryException e) {
+        } catch (ServiceException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -71,7 +71,7 @@ public class PostView implements View{
         Post post = new Post(id, content);
         try{
             postController.update(post);
-        } catch (RepositoryException e){
+        } catch (ServiceException e){
             System.out.println(e.getMessage());
             return;
         }
@@ -89,7 +89,7 @@ public class PostView implements View{
 
         try{
             postController.deleteByID(id);
-        } catch (RepositoryException e){
+        } catch (ServiceException e){
             System.out.println(e.getMessage());
             return;
         }

@@ -4,7 +4,7 @@ import com.vladimir.crudblog.model.Post;
 import com.vladimir.crudblog.model.Region;
 import com.vladimir.crudblog.model.Role;
 import com.vladimir.crudblog.model.User;
-import com.vladimir.crudblog.repository.RepositoryException;
+import com.vladimir.crudblog.service.ServiceException;
 import com.vladimir.crudblog.repository.SQL.SQLUserRepositoryImpl;
 import com.vladimir.crudblog.repository.UserRepository;
 
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class UserController {
-    private final UserRepository userRepository = SQLUserRepositoryImpl.getInstance();
+    private final UserRepository userRepository = new SQLUserRepositoryImpl();
     private final PostController postController = new PostController();
     private final RegionController regionController = new RegionController();
 
@@ -28,7 +28,7 @@ public class UserController {
         else {
             try {
                 region = regionController.getByID(region.getId());
-            } catch (RepositoryException e) {
+            } catch (ServiceException e) {
                 region = null;
             }
         }
@@ -39,7 +39,7 @@ public class UserController {
             else{
                 try {
                     tempPosts.add(postController.getByID(post.getId()));
-                } catch (RepositoryException ignored) {}
+                } catch (ServiceException ignored) {}
             }
         });
         tempPosts.removeIf(Objects::isNull);
@@ -49,15 +49,15 @@ public class UserController {
         return user;
     }
 
-    public User getByID(Long id) throws RepositoryException {
+    public User getByID(Long id) throws ServiceException {
         return userRepository.getById(id);
     }
 
-    public void deleteByID(Long id) throws RepositoryException {
+    public void deleteByID(Long id) throws ServiceException {
         userRepository.deleteById(id);
     }
 
-    public User update(Long id, String firstName, String lastName, Region region, Role role, List<Long> toAdd, List<Long> toDelete) throws RepositoryException {
+    public User update(Long id, String firstName, String lastName, Region region, Role role, List<Long> toAdd, List<Long> toDelete) throws ServiceException {
         User user = userRepository.getById(id);
         if(firstName != null)
             user.setFirstName(firstName);
@@ -101,7 +101,7 @@ public class UserController {
     public boolean exists(Long id) {
         try {
             userRepository.getById(id);
-        } catch (RepositoryException e) {
+        } catch (ServiceException e) {
             return false;
         }
         return true;

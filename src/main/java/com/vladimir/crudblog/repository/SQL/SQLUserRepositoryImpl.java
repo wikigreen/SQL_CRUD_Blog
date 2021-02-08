@@ -1,203 +1,47 @@
 package com.vladimir.crudblog.repository.SQL;
 
-import com.vladimir.crudblog.model.Region;
-import com.vladimir.crudblog.model.Role;
 import com.vladimir.crudblog.model.User;
-import com.vladimir.crudblog.repository.RepositoryException;
+import com.vladimir.crudblog.service.SQLConnectionImpl;
+import com.vladimir.crudblog.service.ServiceException;
 import com.vladimir.crudblog.repository.UserRepository;
-import com.vladimir.crudblog.service.SQLService;
+import com.vladimir.crudblog.service.mysql.service.SQLUserServiceImpl;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
 public class SQLUserRepositoryImpl implements UserRepository {
-    private final static SQLUserRepositoryImpl userRepository = new SQLUserRepositoryImpl();
-    private final SQLService sqlService = SQLService.getInstance();
+    private final SQLUserServiceImpl sqlUserService;
 
-    private SQLUserRepositoryImpl() {
-
-    }
-
-    public static SQLUserRepositoryImpl getInstance() {
-        return userRepository;
+    public SQLUserRepositoryImpl() {
+        try {
+            this.sqlUserService = new SQLUserServiceImpl(SQLConnectionImpl.getInstance());
+        } catch (SQLException sqlException) {
+            throw new Error("Database connection failed +\n" + sqlException.getMessage());
+        }
     }
 
     @Override
     public User save(User user) {
-        ResultSet resultSet = null;
-        try (Statement statement = sqlService.createStatement()){
-            statement.executeUpdate(String.format(
-                "insert into user(First_name, Last_name, Region_ID, Role) " +
-                "values('%s', '%s', %d, '%s')",
-
-                user.getFirstName(),
-                user.getLastName(),
-                (user.getRegion() == null ? null : user.getRegion().getId()),
-                user.getRole().toString()));
-
-            resultSet = statement.executeQuery("select ID from user order by ID desc limit 1");
-            if(resultSet.next()){
-                user.setId(resultSet.getLong("ID"));
-            }
-
-            user.getPosts().forEach(post -> {
-                try {
-                    statement.executeUpdate(String.format(
-                            "insert into users_posts(Person_ID, Post_ID) " +
-                            "values (%d, %d)",
-
-                            user.getId(),
-                            post.getId()));
-                } catch (SQLException sqlE) {
-                    throw new Error(sqlE.getMessage());
-                }
-            });
-        } catch (SQLException sqlE) {
-            throw new Error(sqlE.getMessage());
-        } finally {
-            if(resultSet != null){
-                try {
-                    resultSet.close();
-                } catch (SQLException sqlE) {
-                    System.out.println(sqlE.getMessage());
-                }
-            }
-        }
-        return user;
+        return sqlUserService.save(user);
     }
 
     @Override
-    public User update(User user) throws RepositoryException {
-        int countOfChangedRows;
-        try (Statement statement = sqlService.createStatement()){
-            countOfChangedRows = statement.executeUpdate(String.format(
-                    "update user " +
-                    "set First_name = '%s', " +
-                    "Last_name = '%s', " +
-                    "Region_ID = %d, " +
-                    "Role = '%s' " +
-                    "where id = %d ",
-
-                    user.getFirstName(),
-                    user.getLastName(),
-                    (user.getRegion() == null ? null : user.getRegion().getId()),
-                    user.getRole().toString(),
-                    user.getId()
-            ));
-
-            if(countOfChangedRows < 1) {
-                throw new RepositoryException("There is no user with id " + user.getId());
-            }
-
-            statement.executeUpdate("delete from users_posts where Person_ID = " + user.getId());
-            user.getPosts().forEach(post -> {
-                try {
-                    statement.executeUpdate(String.format(
-                            "insert into users_posts(Person_ID, Post_ID) " +
-                            "values (%d, %d)",
-
-                            user.getId(),
-                            post.getId()));
-                } catch (SQLException sqlE) {
-                    throw new Error(sqlE.getMessage());
-                }
-            });
-        } catch (SQLException sqlE) {
-            throw new Error(sqlE.getMessage());
-        }
-
-        return user;
+    public User update(User user) throws ServiceException {
+        return sqlUserService.update(user);
     }
 
     @Override
-    public User getById(Long id) throws RepositoryException {
-        User user = null;
-        try(Statement statement = sqlService.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from user where id = " + id)){
-            if (resultSet.next()) {
-                Region region = null;
-                try {
-                    region = SQLRegionRepositoryImpl.getInstance().getById(resultSet.getLong("Region_ID"));
-                }catch (RepositoryException ignored){
-                    System.out.println(ignored);
-                }
-                user = new User(id, resultSet.getString("First_name"),
-                        resultSet.getString("Last_name"),
-                        new ArrayList<>(),
-                        region,
-                        Role.parseRole(resultSet.getString("Role")));
-            }
-        } catch (SQLException sqlE){
-            throw new Error(sqlE.getMessage());
-        }
-        if(user == null)
-            throw new RepositoryException("There is no user with id " + id);
-
-        try (Statement statement = sqlService.createStatement();
-            ResultSet usersPostsSet = statement.executeQuery("select Post_ID from users_posts where Person_ID = " + id)){
-            while (usersPostsSet.next()) {
-                try {
-                    user.getPosts().add(SQLPostRepositoryImpl.getInstance().getById(usersPostsSet.getLong("Post_ID")));
-                } catch (RepositoryException ignored){}
-            }
-        } catch (SQLException sqlE){
-            throw new Error(sqlE.getMessage());
-        }
-        return user;
+    public User getById(Long id) throws ServiceException {
+        return sqlUserService.getById(id);
     }
 
     @Override
-    public void deleteById(Long id) throws RepositoryException {
-        int countOfChangedRows;
-        try (Statement statement = sqlService.createStatement()){
-            statement.executeUpdate("delete from users_posts where Person_ID = " + id);
-            countOfChangedRows = statement.executeUpdate(
-                "delete from user " +
-                    "where ID = " + id);
-        } catch (SQLException sqlE) {
-            throw new Error(sqlE.getMessage());
-        }
-        if(countOfChangedRows < 1)
-            throw new RepositoryException("There is no user with id " + id);
+    public void deleteById(Long id) throws ServiceException {
+        sqlUserService.deleteById(id);
     }
 
     @Override
     public List<User> getAll() {
-        ArrayList<User> users = new ArrayList<>();
-
-        try (Statement statement = sqlService.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from user")){
-            while (resultSet.next()) {
-                Region region = null;
-                try {
-                    region = SQLRegionRepositoryImpl.getInstance().getById(resultSet.getLong("Region_ID"));
-                } catch (RepositoryException ignored) {
-                }
-                User user = new User(resultSet.getLong("ID"), resultSet.getString("First_name"),
-                        resultSet.getString("Last_name"),
-                        new ArrayList<>(),
-                        region,
-                        Role.parseRole(resultSet.getString("Role")));
-                users.add(user);
-            }
-        } catch (SQLException sqlE) {
-            throw new Error(sqlE.getMessage());
-        }
-
-
-        users.forEach(user -> {
-            try(Statement statement = sqlService.createStatement();
-                ResultSet usersPostsSet = statement.executeQuery("select Post_ID from users_posts where Person_ID = " + user.getId())){
-                while (usersPostsSet.next()) {
-                    try {
-                        user.getPosts().add(SQLPostRepositoryImpl.getInstance().getById(usersPostsSet.getLong("Post_ID")));
-                    } catch (RepositoryException ignored){}
-                }
-            } catch (SQLException sqlE) {
-                throw new Error(sqlE.getMessage());
-            }
-        });
-        return users;
+        return sqlUserService.getAll();
     }
 }

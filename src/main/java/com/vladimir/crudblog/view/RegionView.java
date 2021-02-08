@@ -2,7 +2,7 @@ package com.vladimir.crudblog.view;
 
 import com.vladimir.crudblog.controller.RegionController;
 import com.vladimir.crudblog.model.Region;
-import com.vladimir.crudblog.repository.RepositoryException;
+import com.vladimir.crudblog.service.ServiceException;
 
 import java.util.List;
 import java.util.Scanner;
@@ -46,7 +46,7 @@ public class RegionView implements View{
         try {
             region = regionController.getByID(id);
             System.out.println(region);
-        } catch (RepositoryException e) {
+        } catch (ServiceException e) {
             System.out.println(e.getMessage());
         }
 
@@ -64,7 +64,7 @@ public class RegionView implements View{
         Region region = new Region(id, SCANNER.nextLine().trim());
         try {
             regionController.update(region);
-        } catch (RepositoryException e){
+        } catch (ServiceException e){
             System.out.println(e.getMessage());
             return;
         }
@@ -82,7 +82,7 @@ public class RegionView implements View{
 
         try{
             regionController.deleteByID(id);
-        } catch (RepositoryException e){
+        } catch (ServiceException e){
             System.out.println(e.getMessage());
             return;
         }
