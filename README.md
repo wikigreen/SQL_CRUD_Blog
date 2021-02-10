@@ -55,6 +55,8 @@ Database migration:
 
 4. GRANT ALL PRIVILEGES ON crud_blog.* TO 'blogger'@'localhost';
 
+5. $mvn clean install
+
 Steps to run this application using your IDE:
 
 1. Use command 'git clone https://github.com/wikigreen/SQL_CRUD_Blog'
