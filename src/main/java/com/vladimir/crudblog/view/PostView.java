@@ -70,12 +70,13 @@ public class PostView implements View{
         if (content.length() == 0) content += " ";
         Post post = new Post(id, content);
         try{
-            postController.update(post);
+            post = postController.update(post);
         } catch (ServiceException e){
             System.out.println(e.getMessage());
             return;
         }
         System.out.println("Post with ID " + id + " has been changed successfully");
+        System.out.println(post);
 
     }
 

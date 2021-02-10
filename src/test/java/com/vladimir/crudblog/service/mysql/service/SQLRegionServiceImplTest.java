@@ -6,11 +6,11 @@ import com.vladimir.crudblog.service.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,25 +43,14 @@ public class SQLRegionServiceImplTest {
     }
 
     @Test
-    public void testResultSetClosing() throws SQLException{
-        when(statementMock.executeQuery(anyString())).thenReturn(resultSetMock);
-        when(statementMock.executeUpdate(anyString())).thenReturn(1);
-        when(resultSetMock.next()).thenReturn(true);
-        when(resultSetMock.getLong("ID")).thenReturn(1L);
-
-        sqlRegionService.save(new Region(null, "Region,"));
-        verify(resultSetMock).close();
-    }
-
-    @Test
-    public void testRegionNotFoundUpdate() throws SQLException{
+    public void testUpdateRegionNotFound() throws SQLException{
         when(statementMock.executeUpdate(anyString())).thenReturn(0);
 
-        assertThrows(ServiceException.class, () -> sqlRegionService.update(new Region(null, "Test")));
+        assertThrows(ServiceException.class, () -> sqlRegionService.update(new Region(1L, "Test")));
     }
 
     @Test
-    public void testGetByIDWhereRegionNotFound() throws SQLException {
+    public void testGetByIDRegionNotFound() throws SQLException {
         when(statementMock.executeQuery(anyString())).thenReturn(resultSetMock);
         when(resultSetMock.next()).thenReturn(false);
 
@@ -91,5 +80,22 @@ public class SQLRegionServiceImplTest {
         when(resultSetMock.next()).thenReturn(false);
 
         assertEquals(sqlRegionService.getAll().size(), 0);
+    }
+
+    @Test
+    public void testGetAll() throws SQLException {
+        List<Region> regions = Arrays.asList(
+        new Region(1L, "Test1"),
+        new Region(2L, "Test2"),
+        new Region(3L, "Test3"),
+        new Region(4L, "Test4"),
+        new Region(5L, "Test5"));
+
+        when(statementMock.executeQuery(anyString())).thenReturn(resultSetMock);
+        when(resultSetMock.next()).thenReturn(true, true, true, true, true, false);
+        when(resultSetMock.getLong("id")).thenReturn(1L, 2L, 3L, 4L, 5L);
+        when(resultSetMock.getString("region")).thenReturn("Test1", "Test2", "Test3", "Test4", "Test5");
+
+        assertEquals(sqlRegionService.getAll(), regions);
     }
 }

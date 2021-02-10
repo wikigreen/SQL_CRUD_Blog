@@ -17,9 +17,21 @@ import java.util.List;
 
 public class SQLUserServiceImpl implements UserService {
     private SQLConnection sqlConnection;
+    private SQLRegionRepositoryImpl sqlRegionRepo;
+    private SQLPostRepositoryImpl sqlPostRepo;
 
     public SQLUserServiceImpl(SQLConnection sqlConnection) {
-       this.sqlConnection = sqlConnection;
+        this.sqlConnection = sqlConnection;
+        this.sqlRegionRepo = new SQLRegionRepositoryImpl();
+        this.sqlPostRepo = new SQLPostRepositoryImpl();
+    }
+
+    public void setSqlRegionService(SQLRegionRepositoryImpl sqlRegionService) {
+        this.sqlRegionRepo = sqlRegionService;
+    }
+
+    public void setSqlPostService(SQLPostRepositoryImpl sqlPostService) {
+        this.sqlPostRepo = sqlPostService;
     }
 
     @Override
@@ -117,7 +129,7 @@ public class SQLUserServiceImpl implements UserService {
             if (resultSet.next()) {
                 Region region = null;
                 try {
-                    region = new SQLRegionRepositoryImpl().getById(resultSet.getLong("Region_ID"));
+                    region = sqlRegionRepo.getById(resultSet.getLong("Region_ID"));
                 }catch (ServiceException e){
                     System.out.println(e.getMessage());
                 }
@@ -137,7 +149,7 @@ public class SQLUserServiceImpl implements UserService {
              ResultSet usersPostsSet = statement.executeQuery("select Post_ID from users_posts where Person_ID = " + id)){
             while (usersPostsSet.next()) {
                 try {
-                    user.getPosts().add(new SQLPostRepositoryImpl().getById(usersPostsSet.getLong("Post_ID")));
+                    user.getPosts().add(sqlPostRepo.getById(usersPostsSet.getLong("Post_ID")));
                 } catch (ServiceException ignored){}
             }
         } catch (SQLException sqlE){
@@ -170,7 +182,7 @@ public class SQLUserServiceImpl implements UserService {
             while (resultSet.next()) {
                 Region region = null;
                 try {
-                    region = new SQLRegionRepositoryImpl().getById(resultSet.getLong("Region_ID"));
+                    region = sqlRegionRepo.getById(resultSet.getLong("Region_ID"));
                 } catch (ServiceException ignored) {
                 }
                 User user = new User(resultSet.getLong("ID"), resultSet.getString("First_name"),
@@ -190,7 +202,7 @@ public class SQLUserServiceImpl implements UserService {
                 ResultSet usersPostsSet = statement.executeQuery("select Post_ID from users_posts where Person_ID = " + user.getId())){
                 while (usersPostsSet.next()) {
                     try {
-                        user.getPosts().add(new SQLPostRepositoryImpl().getById(usersPostsSet.getLong("Post_ID")));
+                        user.getPosts().add(sqlPostRepo.getById(usersPostsSet.getLong("Post_ID")));
                     } catch (ServiceException ignored){}
                 }
             } catch (SQLException sqlE) {

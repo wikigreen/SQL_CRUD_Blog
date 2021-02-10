@@ -5,7 +5,6 @@ import com.vladimir.crudblog.repository.PostRepository;
 import com.vladimir.crudblog.service.ServiceException;
 import com.vladimir.crudblog.repository.SQL.SQLPostRepositoryImpl;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class PostController {

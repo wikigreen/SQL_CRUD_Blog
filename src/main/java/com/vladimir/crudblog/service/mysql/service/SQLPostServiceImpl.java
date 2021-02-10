@@ -59,6 +59,17 @@ public class SQLPostServiceImpl implements PostService {
         }
         if(countOfChangedRows < 1)
             throw new ServiceException("There is no post with id " + post.getId());
+        try (Statement statement = sqlConnection.createStatement();
+             ResultSet resultSet = statement.executeQuery("select * from post where id = " + post.getId())){
+            if (resultSet.next()) {
+                post = new Post(resultSet.getLong("ID"),
+                        resultSet.getString("content"),
+                        new java.util.Date(resultSet.getTimestamp("create_date").getTime()),
+                        new java.util.Date(resultSet.getTimestamp("update_date").getTime()));
+            }
+        } catch (SQLException e){
+            throw new Error(e.getMessage());
+        }
         return post;
     }
 
