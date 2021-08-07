@@ -22,7 +22,7 @@ User from should be able to create, get, update and delete entities.
 
 Layers:
 * model - POJO classes
-* repository - classes that implement access to .txt files
+* repository - classes that implement access to database
 * controller - classes that implements processing of requests from user
 * view - classes that handle console.
 
