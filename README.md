@@ -16,11 +16,7 @@ Problem Statement: I must implement console CRUD application. It should have fol
 * Region (id, name)
 * Role (enum ADMIN, MODERATOR, USER)
 
-As a database should be used .txt files:
-
-* users.txt
-* posts.txt
-* regions.txt
+As a database should be used MySQL database.
 
 User from should be able to create, get, update and delete entities.
 
